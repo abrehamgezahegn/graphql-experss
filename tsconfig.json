@@ -1,0 +1,14 @@
+{
+  "compilerOptions": {
+    "target": "esnext" /*Specify ECMAScript target version*/,
+    "outDir": "dist" /*where to compile javascript files*/,
+    "module": "commonjs",
+    "esModuleInterop": true,
+    "removeComments": true,
+    "moduleResolution": "node",
+    "baseUrl": ".",
+    "paths": {
+      "*": ["node_modules/*", "src/*"]
+    }
+  }
+}
