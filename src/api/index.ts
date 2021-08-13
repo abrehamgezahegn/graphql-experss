@@ -1,7 +1,12 @@
 import { makeExecutableSchema } from "@graphql-tools/schema";
+import { PrismaClient } from "@prisma/client";
 
 import User from "./user/schema";
 import userResolver from "./user/resolver";
+
+import service from "../service";
+
+const prisma = new PrismaClient();
 
 const schema = makeExecutableSchema({
   typeDefs: [User],
@@ -19,6 +24,8 @@ const api = {
     auth: () => {
       console.log("auth in the graphql context, idk why!");
     },
+    prisma,
+    service,
   }),
 };
 

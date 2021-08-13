@@ -13,14 +13,8 @@ const startServer = async () => {
   apolloServer.applyMiddleware({ app });
   webhook(app);
 
-  // await new Promise((resolve) =>
-  //   app.listen({ port: 4000 }, () => {
-  //     console.log("app running at localhost:4000");
-  //   })
-  // );
-
   const HOSTNAME = process.env.HOSTNAME || "0.0.0.0";
-  const PORT = Number(process.env.PORT) || 4000;
+  const PORT = Number(process.env.PORT) || 4444;
 
   const server = app.listen(PORT, HOSTNAME, () => {
     const address = server.address();

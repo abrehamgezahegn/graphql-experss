@@ -1,9 +1,9 @@
 const user = (obj, args, context) => {
-  return {
-    email: "asdfs@gmail.com",
-    name: "aberach",
-    id: "12411-1414-124124-1412",
-  };
+  return context.service.user.fetchAll(args);
 };
 
-export default { Query: { user } };
+const users = (obj, args, context) => {
+  return context.service.user.fetchAll(args, context);
+};
+
+export default { Query: { user, users } };
