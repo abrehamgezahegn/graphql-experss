@@ -1,0 +1,16 @@
+overwrite: true
+schema: src/api/**/*schema.ts
+generates:
+  src/types/graphql.ts:
+    plugins:
+      - "typescript"
+      - "typescript-resolvers"
+      - add:
+          content: "import { context } from './service';"
+    config:
+      useIndexSignature: true
+      defaultMapper: Partial<{T}>
+      contextType: context
+  ./.generated-ast.graphql:
+    plugins:
+      - schema-ast
