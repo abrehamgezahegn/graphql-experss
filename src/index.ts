@@ -9,8 +9,14 @@ const startServer = async () => {
   const apolloServer = new ApolloServer(api);
   await apolloServer.start();
 
+  const path = "/graphql";
   const app: express.Application = express();
-  apolloServer.applyMiddleware({ app });
+  app.use(path, (req, res, next) => {
+    // console.log("in middleware", req);
+    (req as any).user = { name: "abreham" };
+    next();
+  });
+  apolloServer.applyMiddleware({ app, path });
   webhook(app);
 
   const HOSTNAME = process.env.HOSTNAME || "0.0.0.0";

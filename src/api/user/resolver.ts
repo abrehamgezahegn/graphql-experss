@@ -3,6 +3,7 @@ const user = (obj, args, context) => {
 };
 
 const users = (obj, args, context) => {
+  console.log("req", context.req.req);
   return context.service.user.fetchAll(args, context);
 };
 
