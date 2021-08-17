@@ -1,6 +1,9 @@
 import * as express from "express";
 import Shopify, { ApiVersion, AuthQuery } from "@shopify/shopify-api";
 import fs from "fs";
+import { PrismaClient } from "@prisma/client";
+
+const prisma = new PrismaClient();
 
 const router = express.Router();
 
@@ -11,6 +14,7 @@ const {
   FRONTEND_URL,
   FRONTEND_REGISTER_PATH,
   SHOP,
+  COOKIE_NAME,
 } = process.env;
 
 Shopify.Context.initialize({
@@ -27,24 +31,19 @@ router.get("/", async (req, res) => {
 });
 
 router.get("/install", async (req, res) => {
-  console.log("app / called", req.query);
+  console.log("install hitttt");
   let authRoute = await Shopify.Auth.beginAuth(
     req,
     res,
     req.query.shop as string,
     "/shopify/auth/callback",
-    true
+    false
   );
-  console.log("auth route", authRoute);
   return res.redirect(authRoute);
 });
 
 router.get("/auth/callback", async (req, res) => {
-  console.log(
-    "merchant is redirected",
-    "validating auth callback",
-    req.query.shop
-  );
+  console.log("auth callback called");
   try {
     await Shopify.Auth.validateAuthCallback(
       req,
@@ -52,26 +51,61 @@ router.get("/auth/callback", async (req, res) => {
       req.query as unknown as AuthQuery
     );
 
-    const session = await Shopify.Utils.loadCurrentSession(req, res, false);
+    const session = await Shopify.Utils.loadOfflineSession(
+      req.query.shop as string
+    );
+
+    (req as any).session.shopifySessionId = session.id;
 
     console.log("session", session);
 
-    // save shop + accesstoken + shopid in db
-    fs.writeFile("./access_token.txt", session.accessToken, (err: any) => {
-      if (err) {
-        console.error(err);
-        return;
-      }
-      //file written successfully
+    try {
+      const shopifySession = await prisma.storeSession.upsert({
+        where: {
+          id: session.id,
+        },
+        update: {
+          shop: session.shop,
+          accessToken: session.accessToken,
+        },
+        create: {
+          shop: session.shop,
+          id: session.id,
+          accessToken: session.accessToken,
+        },
+      });
+      console.log("shopify session prisma", shopifySession);
+    } catch (error) {
+      console.log("create store session error", error);
+    }
+
+    console.log("settting cookieee");
+    res.cookie("shopify_session", "shaaattaaaa_this_is_the_access_token", {
+      domain: `${FRONTEND_URL}/${FRONTEND_REGISTER_PATH}/${session.shop}/${session.id}`,
+      maxAge: 900000,
+      httpOnly: false,
+      secure: false,
+      sameSite: false,
     });
+
     return res.redirect(
-      `${FRONTEND_URL}/${FRONTEND_REGISTER_PATH}/${session.shop}/${session.onlineAccessInfo.associated_user.id}`
+      `${FRONTEND_URL}/${FRONTEND_REGISTER_PATH}/${session.shop}/${session.id}`
     );
     // save shop id as jwt in user localstorage
   } catch (error) {
     console.log("/auth/callback error", error);
     return res.send(error);
   }
+});
+
+router.get("/get-cookie", async (req, res) => {
+  res.cookie("shopify_session", "shaaattaaaa_this_is_the_access_token", {
+    // domain: FRONTEND_URL,
+    maxAge: 900000000,
+    httpOnly: false,
+    secure: false,
+  });
+  res.send("cookie set");
 });
 
 router.get("/get-session", async (req, res) => {

@@ -14,6 +14,7 @@ const User = gql`
     id: ID!
     email: String!
     name: String!
+    firebaseUserId: String!
   }
 
   input CreateUserInput {

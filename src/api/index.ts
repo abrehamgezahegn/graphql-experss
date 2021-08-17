@@ -14,6 +14,9 @@ const schema = makeExecutableSchema({
     Query: {
       ...userResolver.Query,
     },
+    Mutation: {
+      ...userResolver.Mutation,
+    },
   },
 });
 
