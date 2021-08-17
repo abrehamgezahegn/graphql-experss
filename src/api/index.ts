@@ -25,7 +25,9 @@ const api = {
   context: (req) => ({
     req,
     auth: () => {
-      console.log("auth in the graphql context, idk why!");
+      console.log(
+        "auth in the graphql context only if some resolvers need auth"
+      );
     },
     prisma,
     service,

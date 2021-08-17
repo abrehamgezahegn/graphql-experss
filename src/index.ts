@@ -22,17 +22,7 @@ const startServer = async () => {
       credentials: true,
     })
   );
-  // app.use(cookieParser());
-
-  // var sess = {
-  //   secret: "keyboard cat",
-  //   cookie: {},
-  // };
-
-  // if (app.get("env") === "production") {
-  //   app.set("trust proxy", 1); // trust first proxy
-  //   (sess.cookie as any).secure = true; // serve secure cookies
-  // }
+  app.use(cookieParser());
 
   app.use(
     session({
@@ -48,8 +38,6 @@ const startServer = async () => {
       resave: false,
     })
   );
-
-  // app.use(session(sess));
 
   // returns an object with the cookies' name as keys
   const getAppCookies = (req) => {
@@ -68,24 +56,14 @@ const startServer = async () => {
 
   app.use((req, res, next) => {
     console.log("req header", req.headers);
+    console.log("in middleware cookies", req.cookies);
     // const cookies = getAppCookies(req);
     // console.log("cookies from get app cookies", cookies);
 
     next();
   });
 
-  app.use((req, res, next) => {
-    console.log("in middleware cookies", req.cookies);
-    next();
-  });
-
-  app.use(path, (req, res, next) => {
-    // console.log("in middleware cookies", req.cookies);
-    (req as any).user = { name: "abreham" };
-    next();
-  });
-
-  // app.use(path, (req, res, next) => firebaseValidation(req, res, next));
+  app.use(path, (req, res, next) => firebaseValidation(req, res, next));
 
   apolloServer.applyMiddleware({ app, path });
   webhook(app);

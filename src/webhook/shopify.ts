@@ -1,6 +1,5 @@
 import * as express from "express";
 import Shopify, { ApiVersion, AuthQuery } from "@shopify/shopify-api";
-import fs from "fs";
 import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
@@ -13,8 +12,6 @@ const {
   SCOPES,
   FRONTEND_URL,
   FRONTEND_REGISTER_PATH,
-  SHOP,
-  COOKIE_NAME,
 } = process.env;
 
 Shopify.Context.initialize({
@@ -57,8 +54,6 @@ router.get("/auth/callback", async (req, res) => {
 
     (req as any).session.shopifySessionId = session.id;
 
-    console.log("session", session);
-
     try {
       const shopifySession = await prisma.storeSession.upsert({
         where: {
@@ -88,6 +83,7 @@ router.get("/auth/callback", async (req, res) => {
       sameSite: false,
     });
 
+    console.log("redirecting");
     return res.redirect(
       `${FRONTEND_URL}/${FRONTEND_REGISTER_PATH}/${session.shop}/${session.id}`
     );
