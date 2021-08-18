@@ -1,6 +1,8 @@
 import * as express from "express";
 import Shopify, { ApiVersion, AuthQuery } from "@shopify/shopify-api";
 import { PrismaClient } from "@prisma/client";
+import jwt from "jsonwebtoken";
+import { v4 as uuidv4 } from "uuid";
 
 const prisma = new PrismaClient();
 
@@ -15,6 +17,7 @@ const {
   HOST,
   ACCESS_TOKEN,
   SHOP,
+  JWT_SECRET,
 } = process.env;
 
 Shopify.Context.initialize({
@@ -43,7 +46,6 @@ router.get("/install", async (req, res) => {
 });
 
 router.get("/auth/callback", async (req, res) => {
-  console.log("auth callback called");
   try {
     await Shopify.Auth.validateAuthCallback(
       req,
@@ -55,45 +57,42 @@ router.get("/auth/callback", async (req, res) => {
       req.query.shop as string
     );
 
-    (req as any).session.shopifySessionId = session.id;
-
+    const id = uuidv4();
     try {
+      // const shopifySession = await prisma.storeSession.create({
+      //   data: {
+      //     id: id,
+      //     shop: session.shop,
+      //     shopId: session.id,
+      //     accessToken: session.accessToken,
+      //   },
+      // });
+
+      //todo: remove when done testing
       const shopifySession = await prisma.storeSession.upsert({
         where: {
-          id: session.id,
+          shopId: session.id,
         },
         update: {
           shop: session.shop,
           accessToken: session.accessToken,
         },
         create: {
+          id: id,
           shop: session.shop,
-          id: session.id,
+          shopId: session.id,
           accessToken: session.accessToken,
         },
       });
-      console.log("shopify session prisma", shopifySession);
     } catch (error) {
       console.log("create store session error", error);
+      return res.redirect(`${FRONTEND_URL}/login`);
     }
 
-    console.log("settting cookieee");
-    res.cookie("shopify_session", "shaaattaaaa_this_is_the_access_token", {
-      domain: `${FRONTEND_URL}/${FRONTEND_REGISTER_PATH}/${session.shop}/${session.id}`,
-      maxAge: 900000,
-      httpOnly: false,
-      secure: false,
-      sameSite: false,
-    });
-
-    console.log("setting session");
-    (req as any).session.shopify_session_id = session.id;
-
-    console.log("redirecting");
+    const hash = await jwt.sign({ id }, JWT_SECRET);
     return res.redirect(
-      `${FRONTEND_URL}/${FRONTEND_REGISTER_PATH}/${session.shop}/${session.id}`
+      `${FRONTEND_URL}/${FRONTEND_REGISTER_PATH}/${session.shop}/${hash}`
     );
-    // save shop id as jwt in user localstorage
   } catch (error) {
     console.log("/auth/callback error", error);
     return res.send(error);
@@ -147,7 +146,6 @@ router.get("/get-scripts", async (req, res) => {
 });
 
 router.post("/delete-script", async (req, res) => {
-  console.log("req body delete script: ", req.body);
   try {
     const client = new Shopify.Clients.Graphql(SHOP, ACCESS_TOKEN);
     const script = await client.query({
@@ -164,22 +162,11 @@ router.post("/delete-script", async (req, res) => {
       `,
     });
 
-    console.log("delted script", script);
     res.send(script);
   } catch (error) {
     console.log("err", error);
     res.send(error);
   }
-});
-
-router.get("/get-cookie", async (req, res) => {
-  res.cookie("shopify_session", "shaaattaaaa_this_is_the_access_token", {
-    // domain: FRONTEND_URL,
-    maxAge: 900000000,
-    httpOnly: false,
-    secure: false,
-  });
-  res.send("cookie set");
 });
 
 router.get("/get-session", async (req, res) => {

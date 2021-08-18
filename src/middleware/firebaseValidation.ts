@@ -4,7 +4,11 @@ admin.initializeApp();
 
 const firebaseValidation = async (req, res, next) => {
   try {
-    const idToken = req.headers.authorization.split("Bearer ")[1];
+    const tokens = req.headers.authorization
+      .split("Bearer ")[1]
+      .split(" SEPARATOR ");
+    const idToken = tokens[0];
+
     const decodedToken: admin.auth.DecodedIdToken = await admin
       .auth()
       .verifyIdToken(idToken);
@@ -12,7 +16,7 @@ const firebaseValidation = async (req, res, next) => {
     req.userUid = uid;
     next();
   } catch (error) {
-    console.log("verify id token", error);
+    console.log("verify id token error", error);
     res.status(401).send("Invalid auth");
   }
 };

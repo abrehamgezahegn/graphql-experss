@@ -16,10 +16,12 @@ model User {
   email   String   @unique
   name    String?
   firebaseUserId String
+  storeId String @unique
 }
 
 model StoreSession {
   id    String @unique
   shop    String
   accessToken   String
+  shopId String @unique
 }
