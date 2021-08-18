@@ -12,6 +12,9 @@ const {
   SCOPES,
   FRONTEND_URL,
   FRONTEND_REGISTER_PATH,
+  HOST,
+  ACCESS_TOKEN,
+  SHOP,
 } = process.env;
 
 Shopify.Context.initialize({
@@ -83,6 +86,9 @@ router.get("/auth/callback", async (req, res) => {
       sameSite: false,
     });
 
+    console.log("setting session");
+    (req as any).session.shopify_session_id = session.id;
+
     console.log("redirecting");
     return res.redirect(
       `${FRONTEND_URL}/${FRONTEND_REGISTER_PATH}/${session.shop}/${session.id}`
@@ -91,6 +97,78 @@ router.get("/auth/callback", async (req, res) => {
   } catch (error) {
     console.log("/auth/callback error", error);
     return res.send(error);
+  }
+});
+
+router.get("/set-script", async (req, res) => {
+  try {
+    const client = new Shopify.Clients.Graphql(SHOP, ACCESS_TOKEN);
+    const script = await client.query({
+      data: `
+        mutation {
+          scriptTagCreate(input:{src: "${HOST}/bundle.js", displayScope: ALL}){
+            scriptTag{
+              src
+              displayScope
+            } 
+          }
+        }
+      `,
+    });
+    console.log("script res", script.body);
+  } catch (error) {
+    console.log("error", error);
+  }
+});
+
+router.get("/get-scripts", async (req, res) => {
+  try {
+    const client = new Shopify.Clients.Graphql(SHOP, ACCESS_TOKEN);
+
+    const script = await client.query({
+      data: `
+      {
+        scriptTags(first:100){
+          edges{
+            node{
+               src
+               id
+            }
+          }
+        }
+      }
+      `,
+    });
+    console.log("script tags", (script.body as any).data.scriptTags.edges);
+    res.send((script.body as any).data.scriptTags.edges);
+  } catch (error) {
+    console.log("error", error);
+  }
+});
+
+router.post("/delete-script", async (req, res) => {
+  console.log("req body delete script: ", req.body);
+  try {
+    const client = new Shopify.Clients.Graphql(SHOP, ACCESS_TOKEN);
+    const script = await client.query({
+      data: `
+      mutation {
+        scriptTagDelete(id: "${req.body.id}"){
+          deletedScriptTagId
+          userErrors {
+            field
+            message
+          }
+        }
+      }
+      `,
+    });
+
+    console.log("delted script", script);
+    res.send(script);
+  } catch (error) {
+    console.log("err", error);
+    res.send(error);
   }
 });
 

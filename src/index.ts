@@ -16,6 +16,8 @@ const startServer = async () => {
   const path = "/graphql";
   const app: express.Application = express();
 
+  app.use(express.static("public"));
+
   app.use(
     cors({
       origin: process.env.FRONTEND_URL,
