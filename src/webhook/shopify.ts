@@ -74,6 +74,7 @@ router.get("/auth/callback", async (req, res) => {
           shopId: session.id,
         },
         update: {
+          id: id,
           shop: session.shop,
           accessToken: session.accessToken,
         },

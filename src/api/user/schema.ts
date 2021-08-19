@@ -8,6 +8,7 @@ const User = gql`
 
   type Mutation {
     createUser(data: CreateUserInput!): User!
+    createSubscription(data: CreateSubscriptionInput!): Subscription!
   }
 
   type User {
@@ -17,9 +18,23 @@ const User = gql`
     firebaseUserId: String!
   }
 
+  type Subscription {
+    id: ID!
+    confirmationUrl: String!
+  }
+
   input CreateUserInput {
     email: String!
     name: String!
+  }
+
+  input CreateSubscriptionInput {
+    plan: Plan!
+  }
+  enum Plan {
+    BASIC
+    GOLD
+    PLATINUM
   }
 `;
 

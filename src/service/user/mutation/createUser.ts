@@ -14,6 +14,8 @@ const createUser = async (args, context) => {
     },
   });
 
+  console.log("store", store);
+
   const firebaseUserId = context.req.req.userUid;
   return await context.prisma.user.create({
     data: {
