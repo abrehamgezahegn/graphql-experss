@@ -1,16 +1,30 @@
 overwrite: true
-schema: src/api/**/*schema.ts
 generates:
   src/types/graphql.ts:
+    schema: src/api/**/*schema.ts
     plugins:
-      - "typescript"
-      - "typescript-resolvers"
+      - typescript
+      - typescript-resolvers
       - add:
           content: "import { context } from './service';"
     config:
       useIndexSignature: true
       defaultMapper: Partial<{T}>
       contextType: context
+  src/types/shopify_graphql.ts:
+    schema: src/*.json
+    documents: src/**/*.graphql
+    plugins:
+      - typescript
+      - typescript-operations
+      - typescript-urql
+    config:
+      defaultMapper: Partial<{T}>
+      withComponent: false
+      withHOC: false
+      withHooks: true
+      # useIndexSignature: true
   ./.generated-ast.graphql:
+    schema: src/api/**/*schema.ts
     plugins:
       - schema-ast

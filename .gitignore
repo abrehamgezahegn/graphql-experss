@@ -67,6 +67,7 @@ jspm_packages/
 # api
 dist
 src/types/graphql.ts
+src/types/shopify_graphql.ts
 .generated-ast.graphql
 export.sh
 access_token.txt
