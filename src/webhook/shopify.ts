@@ -176,3 +176,12 @@ router.get("/get-session", async (req, res) => {
 });
 
 export default router;
+
+/*-> merchant installs app 
+  -> we get shop and shop access token -> save that in our DB
+  -> send token  consisting shopId to FE -> register with firebase 
+  -> createAccount resolver -> at this point we have firebaseUserId and shop 
+  -> fetch shop & shop access token from out DB 
+  -> ***save firebaseId key and JSON (shop info including accessToken) in redis***
+  -> attach the data in the req.user (firebaseValidation middleware) on each req
+*/

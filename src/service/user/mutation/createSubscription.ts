@@ -1,8 +1,6 @@
 import Shopify, { ApiVersion, AuthQuery } from "@shopify/shopify-api";
 import { gql } from "graphql-request";
 
-const { SHOP, ACCESS_TOKEN } = process.env;
-
 const plans = {
   BASIC: {
     price: 99.9,
@@ -36,9 +34,24 @@ const plans = {
 // `;
 
 const createSubscription = async (args, context) => {
-  console.log("args", args);
+  console.log("context req", context.req.req.userUid);
+
+  const user = await context.prisma.user.findUnique({
+    where: {
+      firebaseUserId: context.req.req.userUid,
+    },
+  });
+
+  console.log("user", user);
+  const store = await context.prisma.storeSession.findUnique({
+    where: {
+      shopId: user.storeId,
+    },
+  });
+  console.log("store", store);
+
   const plan = plans[args.data.plan];
-  const client = new Shopify.Clients.Graphql(SHOP, ACCESS_TOKEN);
+  const client = new Shopify.Clients.Graphql(store.shop, store.accessToken);
   const res = await client.query({
     data: ` 
     mutation {
@@ -55,7 +68,7 @@ const createSubscription = async (args, context) => {
           }
           
           }            , 
-          returnUrl:  "http://localhost:3000/subscription-success",  test: true ) {
+          returnUrl:  "http://localhost:3000/create-funnel",  test: true ) {
           appSubscription {
             id
             lineItems {

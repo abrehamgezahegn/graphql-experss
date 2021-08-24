@@ -72,3 +72,5 @@ src/types/shopify_graphql.ts
 export.sh
 access_token.txt
 ngrok
+firebase-config.json
+yarn.lock
