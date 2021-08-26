@@ -8,7 +8,7 @@ const createUser = async (args, context) => {
 
   const decodedSessionId = jwt.verify(sessionIdHash, process.env.JWT_SECRET);
 
-  const store = await context.prisma.storeSession.findUnique({
+  const store = await context.prisma.store.findUnique({
     where: {
       id: (decodedSessionId as any).id,
     },
@@ -22,7 +22,7 @@ const createUser = async (args, context) => {
       email: args.data.email,
       name: args.data.name,
       firebaseUserId,
-      storeId: store.shopId,
+      storeId: store.storeId,
     },
   });
 };

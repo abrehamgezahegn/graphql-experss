@@ -43,15 +43,18 @@ const createSubscription = async (args, context) => {
   });
 
   console.log("user", user);
-  const store = await context.prisma.storeSession.findUnique({
+  const store = await context.prisma.store.findUnique({
     where: {
-      shopId: user.storeId,
+      storeId: user.storeId,
     },
   });
   console.log("store", store);
 
   const plan = plans[args.data.plan];
-  const client = new Shopify.Clients.Graphql(store.shop, store.accessToken);
+  const client = new Shopify.Clients.Graphql(
+    store.storeName,
+    store.accessToken
+  );
   const res = await client.query({
     data: ` 
     mutation {

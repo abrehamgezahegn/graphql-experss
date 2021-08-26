@@ -1,0 +1,18 @@
+mutation appSubscriptionCreate {
+  appSubscriptionCreate(
+    name: "Storebrew"
+    lineItems: {
+      plan: {
+        appRecurringPricingDetails: {
+          interval: EVERY_30_DAYS
+          price: { amount: 13, currencyCode: USD }
+        }
+      }
+    }
+    returnUrl: "asdfasdf.com"
+  ) {
+    appSubscription {
+      createdAt
+    }
+  }
+}
