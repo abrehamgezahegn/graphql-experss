@@ -10,18 +10,94 @@ generator client {
   provider = "prisma-client-js"
 }
 
-
 model User {
   id      Int      @default(autoincrement()) @id
   email   String   @unique
   name    String?
   firebaseUserId String @unique
-  storeId String @unique
+  state UserState
+  stores Store[]
+  funnels Funnel[]
 }
 
-model StoreSession {
-  id    String @unique
-  shop    String
-  accessToken   String
-  shopId String @unique
+model Store {
+  storeId String @unique
+  storeName    String
+  accessToken String
+  userId Int
+  user User? @relation(fields: [userId], references: [id])
+}
+
+
+model Design {
+  id Int @default(autoincrement()) @id
+  funnelLocation FunnelLocation
+  style Json
+}
+
+model Funnel {
+  id Int @default(autoincrement()) @id
+  userId Int
+  user User @relation(fields: [userId], references: [id])
+  funnelName String
+  funnelType FunnelType 
+  triggerType TriggerType?
+  priority Int
+  skipIfProductInCart Boolean
+  allowDiscountCode Boolean
+  triggerProducts FunnelTriggerProduct[]
+  offerProducts FunnelOfferProduct[]
+}
+
+
+model FunnelTriggerProduct {
+  id Int @default(autoincrement()) @id
+  productId String
+  variantId String?
+  productType ProductType
+  funnelId Int
+  funnel Funnel @relation(fields: [funnelId], references: [id])
+}
+
+
+model FunnelOfferProduct {
+  id Int @default(autoincrement()) @id
+  productId String
+  variantId String?
+  productType ProductType
+  discounted Boolean
+  discountPercent Float
+  offerText String
+  offerDescription String
+  funnelId Int
+  funnel Funnel @relation(fields: [funnelId], references: [id])
+}
+
+enum ProductType {
+  Main
+  Variant
+}
+
+
+enum UserState {
+  Subscribed 
+  Registerd
+}
+
+
+enum FunnelLocation {
+  Cart
+  Thankyou
+  PostPurchase
+}
+
+enum FunnelType {
+  CrossSell
+  VariantUpsell
+  ProductUpsell
+}
+
+enum TriggerType {
+  AllProducts 
+  SpecificProducts
 }

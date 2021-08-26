@@ -1,9 +1,9 @@
 -- CreateTable
-CREATE TABLE "StoreSession" (
+CREATE TABLE "store" (
     "id" TEXT NOT NULL,
     "shop" TEXT NOT NULL,
     "accessToken" TEXT NOT NULL
 );
 
 -- CreateIndex
-CREATE UNIQUE INDEX "StoreSession.id_unique" ON "StoreSession"("id");
+CREATE UNIQUE INDEX "store.id_unique" ON "store"("id");

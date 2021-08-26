@@ -59,29 +59,27 @@ router.get("/auth/callback", async (req, res) => {
 
     const id = uuidv4();
     try {
-      // const shopifySession = await prisma.storeSession.create({
+      // const shopifySession = await prisma.store.create({
       //   data: {
       //     id: id,
       //     shop: session.shop,
-      //     shopId: session.id,
+      //     storeId: session.id,
       //     accessToken: session.accessToken,
       //   },
       // });
 
       //todo: remove when done testing
-      const shopifySession = await prisma.storeSession.upsert({
+      const shopifySession = await prisma.store.upsert({
         where: {
-          shopId: session.id,
+          storeId: session.id,
         },
         update: {
-          id: id,
-          shop: session.shop,
+          storeName: session.shop,
           accessToken: session.accessToken,
         },
         create: {
-          id: id,
-          shop: session.shop,
-          shopId: session.id,
+          storeName: session.shop,
+          storeId: session.id,
           accessToken: session.accessToken,
         },
       });
@@ -179,7 +177,7 @@ export default router;
 
 /*-> merchant installs app 
   -> we get shop and shop access token -> save that in our DB
-  -> send token  consisting shopId to FE -> register with firebase 
+  -> send token  consisting storeId to FE -> register with firebase 
   -> createAccount resolver -> at this point we have firebaseUserId and shop 
   -> fetch shop & shop access token from out DB 
   -> ***save firebaseId key and JSON (shop info including accessToken) in redis***
